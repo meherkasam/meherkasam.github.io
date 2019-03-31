@@ -1,1 +1,60 @@
-Hello World
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs/dist/tf.min.js"> </script>
+
+<script src="https://cdn.jsdelivr.net/npm/ua-parser-js@0/dist/ua-parser.min.js"></script>
+
+<img id="img" src="https://i.imgur.com/gQLIJkN.png" crossorigin="" style = 'display:none;' />
+
+
+ <table>
+    <tr>
+      <td>Version</td>
+      <td id = 'version'>v1</td>
+      <td></td>
+    </tr>
+  <tr>
+    <td>Browser</td>
+    <td id = 'browserName'></td>
+    <td id = 'browserVersion'></td>
+  </tr>
+  <tr>
+    <td>OS</td>
+    <td id = 'osName'></td>
+    <td id = 'osVersion'></td>
+  </tr>
+  <tr>
+    <td>Time</td>
+    <td id = 'time'></td>
+    <td >ms</td>
+  </tr>
+</table>
+
+<script>
+var parser = new UAParser();
+var output = parser.getResult();
+
+
+document.getElementById('browserVersion').innerHTML = output.browser.version;
+document.getElementById('browserName').innerHTML = output.browser.name;
+document.getElementById('osName').innerHTML = output.os.name;
+document.getElementById('osVersion').innerHTML = output.os.version;
+
+ const path = 'https://storage.googleapis.com/tfjs-models/tfjs/mobilenet_v1_1.0_224/model.json';
+
+ tf.loadLayersModel(path).then(model => {
+    //warm up
+    model.predict(tf.zeros([1, 224, 224, 3]));
+    var time = 0;
+    const num_iter = 100;
+
+    for (i= 1 ; i <= num_iter; i++) {
+        const randomVector = tf.randomNormal([1, 224, 224, 3]);
+        const t0 = tf.util.now();
+        const output = model.predict(randomVector);
+        output.dataSync();
+        const t1 = tf.util.now();
+        time += (t1-t0);
+    }
+    document.getElementById('time').innerHTML = (time/num_iter);
+
+ });
+</script>
